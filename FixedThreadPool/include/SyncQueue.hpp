@@ -27,19 +27,11 @@ namespace shanchuan
         bool is_full() const
         {
             bool full = _task_queue.size() >= _max_capacity;
-            if (full)
-            {
-                std::cout << "Queue is full, producer thread is waiting..." << std::endl;
-            }
             return full;
         }
         bool is_empty() const
         {
             bool empty = _task_queue.empty();
-            if (empty)
-            {
-                std::cout << "Queue is empty, consumer thread is waiting..." << std::endl;
-            }
             return empty;
         }
 

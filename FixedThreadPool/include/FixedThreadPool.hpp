@@ -40,8 +40,7 @@ namespace shanchuan
                 }
                 catch (const std::runtime_error &e)
                 {
-                    // 线程池正在停止，退出线程
-                    throw std::runtime_error("ThreadPool is stopping, exiting thread.");
+                    // 线程池正在停止，退出线程（不要重新抛出，直接退出循环）
                     break;
                 }
                 if (task)
@@ -52,7 +51,11 @@ namespace shanchuan
         }
         void stop_thread_group()
         {
+            // 等待队列处理完现有任务
             _task_queue.wait_stop();
+            // 设置停止标志并唤醒所有可能在 take() 中阻塞的线程，
+            // 否则它们可能永远在等待新的任务而无法返回，导致 join 卡住。
+            _task_queue.force_stop();
             _is_running = false;
             for (auto &thread : _thread_group)
             {
@@ -67,6 +70,13 @@ namespace shanchuan
     public:
         FixedThreadPool(int num_threads = std::thread::hardware_concurrency()) : _task_queue(MaxTaskCount), _is_running(false)
         {
+            // std::thread::hardware_concurrency() can return 0 on some platforms.
+            // Ensure at least one worker thread is started to avoid deadlock where
+            // tasks are added but no worker consumes them.
+            if (num_threads <= 0)
+            {
+                num_threads = 1;
+            }
             start(num_threads);
         }
         ~FixedThreadPool()
