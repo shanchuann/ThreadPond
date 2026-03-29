@@ -52,11 +52,6 @@ ThreadPond/
 
 ```
 
-说明：
-- 每个模块通常包含 `include/`（头文件）与 `src/`（实现）目录。
-- `build/` 与 `bin/` 为本地构建/输出目录，不应提交到远程仓库（受 `.gitignore` 管理）。
-- 如需我把目录概览精确到每个子文件或调整为项目的实际结构，我可以扫描仓库并更新该节。
-
 **依赖**
 - C++17 或更高
 - CMake 3.10+（建议 3.15+）
@@ -72,21 +67,14 @@ cmake ..
 cmake --build . -- -j
 ```
 
-2. （可选）运行单元/示例二进制：
+2. 运行单元/示例二进制：
 
 ```bash
 # 如果构建产物放在 bin/ 下
-./bin/test1
-
-# 或者直接在 build 目录下运行生成的可执行文件，例如：
-./test/test1
+./bin/test
 ```
 
-3. 使用 CTest 运行测试（如果启用了 CTest）：
-
-```bash
-ctest --output-on-failure
-```
+在运行测试前，请确保已正确设置 CMakeLists.txt 以包含测试源文件，并启用了测试构建。
 
 **示例用法**
 
@@ -96,24 +84,33 @@ ctest --output-on-failure
 #include "FixedThreadPool/FixedThreadPool.hpp"
 
 // 创建一个包含 4 个工作线程的线程池
-ThreadPond::FixedThreadPool pool(4);
+int main() {
+	#include <iostream>
+	shanchuan::FixedThreadPool pool(4);
 
-pool.submit([]{
-	// 执行任务
-});
+	// 提交返回值任务并等待结果
+	auto fut = pool.submit([](int a, int b) {
+		return a + b;
+	}, 2, 3);
 
-pool.shutdown(); // 等待所有任务完成并关闭线程池
+	std::cout << "sum = " << fut.get() << std::endl;
+
+	// 提交无返回值任务
+	pool.submit([]{
+		std::cout << "Hello from worker thread" << std::endl;
+	});
+
+	// 直接添加任务（无 future）
+	pool.add_task([]{
+		// 执行简单任务
+	});
+
+	// 优雅关闭线程池，等待所有任务完成
+	pool.stop();
+	return 0;
+}
 ```
-
-**开发与贡献**
-
-- 欢迎提交 issue 与 PR。
-- 建议流程：Fork → 新分支 → 添加/更新测试 → 提交 PR
 
 **许可证**
 
-本项目采用 MIT 许可证，详见根目录 `LICENSE`。
-
-----
-
-文件: [FixedThreadPool/include/FixedThreadPool.hpp](FixedThreadPool/include/FixedThreadPool.hpp) | 测试: [test/test1.cpp](test/test1.cpp)
+本项目采用 MIT 许可证，详见根目录 `LICENSE`，欢迎提交 issue 与 PR。
