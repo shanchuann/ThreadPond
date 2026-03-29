@@ -6,6 +6,7 @@
 #include <future>
 #include <type_traits>
 #include "SyncQueue.hpp"
+#include "Logger.hpp"
 
 #ifndef FIXEDTHREADPOOL_HPP
 #define FIXEDTHREADPOOL_HPP
@@ -52,14 +53,14 @@ namespace shanchuan
         }
         void add_task(const Task &task) {
             if (_task_queue.put(task) != 0) {
-                throw std::runtime_error("Failed to add task to the queue, it may be full or the thread pool is stopping.");
-                task(); // 直接执行任务，避免丢失
+                LOG_ERROR("[FixedThreadPool] add_task(): Failed to add task to the queue, it may be full or the thread pool is stopping.");
+                if (task) task(); // 直接执行任务，避免丢失
             }
         }
         void add_task(Task &&task) {
             if (_task_queue.put(std::forward<Task>(task)) != 0) {
-                throw std::runtime_error("Failed to add task to the queue, it may be full or the thread pool is stopping.");
-                task(); // 直接执行任务，避免丢失
+                LOG_ERROR("[FixedThreadPool] add_task(): Failed to add task to the queue, it may be full or the thread pool is stopping.");
+                if (task) task(); // 直接执行任务，避免丢失
             }
         }
         template <typename F, typename... Args>
