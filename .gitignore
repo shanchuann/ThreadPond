@@ -29,3 +29,7 @@ Makefile
 # OS
 .DS_Store
 Thumbs.db
+
+# Dir
+ScheduledThreadPool_1/
+ScheduledThreadPool_2/

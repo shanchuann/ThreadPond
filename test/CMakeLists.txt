@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(ThreadPond)
 
-add_executable(test1 test1.cpp ${SRC_THREAD})
+add_executable(test ScheduledTest.cpp ${SRC_THREAD} ${SRC_LOG})
 
-target_link_libraries(test1 pthread)
+target_link_libraries(test pthread)

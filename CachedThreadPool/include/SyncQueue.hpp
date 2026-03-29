@@ -1,6 +1,6 @@
+#include <mutex>
 #include <deque>
 #include <chrono>
-#include <mutex>
 #include <condition_variable>
 
 #ifndef SYNCQUEUE_HPP
